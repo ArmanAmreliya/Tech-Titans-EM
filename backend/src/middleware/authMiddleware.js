@@ -1,111 +1,24 @@
-<<<<<<< HEAD
-const jwt=require('jsonwebtoken');
-
-const authEmployee= async(req,res,next)=>{
-
-    try{
-       const {token}=req.headers
-       if(!token){
-        return   res.json({sucess:false,message:"Not authorized login again"})
-       }
-       const decode=jwt.verify(token,process.env.JWT_SECRET);
-       if(!req.body) req.body={};
-       req.body.userId=decode.id;
-       next()
-    }
-    catch(err){
-          console.log(err);
-     res.json({sucess:false,message:err.message})
-
-    }
-
-}
-
-const authManager= async(req,res,next)=>{
-
-    try{
-       const {token}=req.headers
-       if(!token){
-        return   res.json({sucess:false,message:"Not authorized login again"})
-       }
-       const decode=jwt.verify(token,process.env.JWT_SECRET);
-       if(!req.body) req.body={};
-       req.body.managerId=decode.id;
-       next()
-    }
-    catch(err){
-          console.log(err);
-     res.json({sucess:false,message:err.message})
-
-    }
-
-}
-
-const authFinance= async(req,res,next)=>{
-
-    try{
-       const {token}=req.headers
-       if(!token){
-        return   res.json({sucess:false,message:"Not authorized login again"})
-       }
-       const decode=jwt.verify(token,process.env.JWT_SECRET);
-       if(!req.body) req.body={};
-       req.body.financeId=decode.id;
-       next()
-    }
-    catch(err){
-          console.log(err);
-     res.json({sucess:false,message:err.message})
-
-    }
-
-}
-
-const authDirector= async(req,res,next)=>{
-
-    try{
-       const {token}=req.headers
-       if(!token){
-        return   res.json({sucess:false,message:"Not authorized login again"})
-       }
-       const decode=jwt.verify(token,process.env.JWT_SECRET);
-       if(!req.body) req.body={};
-       req.body.Id=decode.id;
-       next()
-    }
-    catch(err){
-          console.log(err);
-     res.json({sucess:false,message:err.message})
-
-    }
-
-}
-
-module.exports={authEmployee,authManager,authFinance,authDirector}  
-=======
-// src/middlewares/authMiddleware.js
+// src/middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Hardcoded JWT secret for now (later move to .env)
+// Hardcoded JWT secret for now
 const JWT_SECRET = 'supersecretkey';
 
+// Main auth middleware
 const authMiddleware = async (req, res, next) => {
   try {
-    // Get token from headers
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'No token provided' });
+      return res.status(401).json({ success: false, message: 'Not authorized, login again' });
     }
 
     const token = authHeader.split(' ')[1];
-
-    // Verify token
     const decoded = jwt.verify(token, JWT_SECRET);
 
     // Attach user to request
     const user = await User.findById(decoded.id).select('-password');
-    if (!user) return res.status(401).json({ error: 'User not found' });
+    if (!user) return res.status(401).json({ success: false, message: 'User not found' });
 
     req.user = {
       id: user._id,
@@ -117,9 +30,18 @@ const authMiddleware = async (req, res, next) => {
     next();
   } catch (err) {
     console.error(err);
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ success: false, message: 'Unauthorized', error: err.message });
   }
 };
 
-module.exports = authMiddleware;
->>>>>>> b041541 (Backend middleware , controller , routes)
+// Role-based middleware
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Access denied: insufficient role' });
+    }
+    next();
+  };
+};
+
+module.exports = { authMiddleware, authorizeRoles };

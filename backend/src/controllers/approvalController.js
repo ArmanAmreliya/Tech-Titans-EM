@@ -1,74 +1,66 @@
+// src/controllers/approvalController.js
 const Expense = require('../models/Expense');
 const User = require('../models/User');
-const ApprovalRule = require('../models/ApprovalRule');
 
-// Approve or Reject an expense with conditional rules
+// Approve or Reject an expense
 exports.approveOrRejectExpense = async (req, res) => {
   try {
     const expenseId = req.params.id;
-    const { action, comment } = req.body; // action: 'approve' or 'reject'
+    const { action, comment } = req.body; // 'approve' or 'reject'
     const userId = req.user.id;
     const userRole = req.user.role;
 
-    // Fetch expense with approvals
+    // Fetch expense
     const expense = await Expense.findById(expenseId).populate('approvals.approver', 'name role');
     if (!expense) return res.status(404).json({ error: 'Expense not found' });
 
     // Find the approval step for this user/role
     const approvalStep = expense.approvals.find(app =>
-      (!app.approved && !app.rejected) && 
-      ((app.approver && app.approver._id.toString() === userId) || app.role === userRole)
+      (app.approver && app.approver._id.toString() === userId) || app.role === userRole
     );
 
     if (!approvalStep) return res.status(403).json({ error: 'You are not an approver for this expense' });
+    if (approvalStep.approved !== undefined) return res.status(400).json({ error: 'You have already approved/rejected this expense' });
 
     // Update approval step
-    if (action === 'approve') approvalStep.approved = true;
-    else if (action === 'reject') approvalStep.rejected = true;
+    approvalStep.approved = action === 'approve';
     approvalStep.comment = comment || '';
     approvalStep.approvedAt = Date.now();
 
-    // -------------------------------
-    // Conditional Approval Logic
-    // -------------------------------
-    let allApproved = false;
+    // -----------------------------
+    // Evaluate Expense Status
+    // -----------------------------
+    let status = 'pending';
 
-    const totalApprovers = expense.approvals.length;
-    const approvedCount = expense.approvals.filter(a => a.approved).length;
-    const rejectedCount = expense.approvals.filter(a => a.rejected).length;
-
-    // Fetch approval rule (assume only 1 active per company)
-    const rule = await ApprovalRule.findOne({ companyId: expense.companyId, isActive: true });
-
-    if (rejectedCount > 0) {
-      expense.status = 'rejected';
-    } else if (rule) {
-      switch (rule.ruleType) {
-        case 'percentage':
-          if ((approvedCount / totalApprovers) * 100 >= rule.percentage) allApproved = true;
-          break;
-
-        case 'specific':
-          if (expense.approvals.some(a => a.approver && a.approver._id.equals(rule.specificApprover) && a.approved)) {
-            allApproved = true;
-          }
-          break;
-
-        case 'hybrid':
-          const percentageMet = rule.percentage ? ((approvedCount / totalApprovers) * 100 >= rule.percentage) : false;
-          const specificMet = rule.specificApprover ? expense.approvals.some(a => a.approver && a.approver._id.equals(rule.specificApprover) && a.approved) : false;
-          if (percentageMet || specificMet) allApproved = true;
-          break;
-      }
-
-      expense.status = allApproved ? 'approved' : 'pending';
+    if (expense.approvals.some(a => a.approved === false)) {
+      // Any rejection immediately rejects the expense
+      status = 'rejected';
     } else {
-      // fallback: sequential approval
-      if (approvedCount === totalApprovers) expense.status = 'approved';
-      else expense.status = 'pending';
+      // Evaluate based on ruleType
+      const { ruleType, percentage, specificApprover } = expense;
+
+      if (ruleType === 'percentage') {
+        const approvedCount = expense.approvals.filter(a => a.approved).length;
+        const total = expense.approvals.length;
+        if ((approvedCount / total) * 100 >= percentage) status = 'approved';
+      } else if (ruleType === 'specific') {
+        if (expense.approvals.some(a => a.approver?._id.toString() === specificApprover?.toString() && a.approved)) {
+          status = 'approved';
+        }
+      } else if (ruleType === 'hybrid') {
+        const approvedCount = expense.approvals.filter(a => a.approved).length;
+        const total = expense.approvals.length;
+        const specificApproved = expense.approvals.some(a => a.approver?._id.toString() === specificApprover?.toString() && a.approved);
+        if (specificApproved || (approvedCount / total) * 100 >= percentage) status = 'approved';
+      } else {
+        // sequential fallback
+        if (expense.approvals.every(a => a.approved)) status = 'approved';
+      }
     }
 
+    expense.status = status;
     await expense.save();
+
     res.json({ message: `Expense ${action}d successfully`, expense });
 
   } catch (err) {
@@ -85,11 +77,10 @@ exports.getPendingApprovals = async (req, res) => {
 
     // Find expenses where this user/role is in approvals and not yet approved/rejected
     const expenses = await Expense.find({
-      approvals: {
+      'approvals': {
         $elemMatch: {
           $or: [{ approver: userId }, { role: userRole }],
-          approved: false,
-          rejected: { $ne: true }
+          approved: { $exists: false }
         }
       },
       status: 'pending'

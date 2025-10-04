@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // Hardcoded JWT secret for now
-const JWT_SECRET = 'supersecretkey';
+const JWT_SECRET = process.env.JWT_SECRET;
+
 
 // Main auth middleware
 const authMiddleware = async (req, res, next) => {

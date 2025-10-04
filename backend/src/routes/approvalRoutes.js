@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const approvalController = require('../controllers/approvalController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const{ authMiddleware} = require('../middleware/authMiddleware');
 
 // Approve or reject an expense
 router.patch('/:id', authMiddleware, approvalController.approveOrRejectExpense);

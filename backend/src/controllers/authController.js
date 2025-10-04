@@ -3,8 +3,8 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-// Secret key for JWT (for now hardcoded, later move to .env)
-const JWT_SECRET = 'supersecretkey';
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.signup = async (req, res) => {
   try {

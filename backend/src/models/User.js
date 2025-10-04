@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',  // Optional: if you want multi-company support
-    required: true
+    required: false
   },
 
   isActive: {

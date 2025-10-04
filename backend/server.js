@@ -1,12 +1,12 @@
-// server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
 // Import routes
-const authRoutes = require("./src/routes/auth");
-const expenseRoutes = require("./src/routes/expenses");
+const authRoutes = require("./src/routes/authRoutes");
+const expenseRoutes = require("./src/routes/expenseRoutes");
+const approvalRoutes = require("./src/routes/approvalRoutes");
 
 const app = express();
 
@@ -15,8 +15,9 @@ app.use(cors());
 app.use(express.json()); // Parse JSON request body
 
 // Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/expenses", expenseRoutes);
+app.use("/auth", authRoutes);
+app.use("/expenses", expenseRoutes);
+app.use("/approvals", approvalRoutes);
 
 // Health Check
 app.get("/", (req, res) => {
@@ -35,22 +36,27 @@ app.use((err, req, res, next) => {
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 5000;
 
-if (!MONGO_URI) {
-  console.error("❌ MONGO_URI is not defined in environment variables");
-  process.exit(1);
-}
+console.log("🔧 Starting server in development mode...");
 
-mongoose
-  .connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("✅ Connected to MongoDB Atlas");
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
-  });
+// Start server first, then attempt MongoDB connection
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+
+  // Try MongoDB connection after server starts
+  if (MONGO_URI) {
+    mongoose
+      .connect(MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then(() => {
+        console.log("✅ Connected to MongoDB Atlas");
+      })
+      .catch((err) => {
+        console.error("❌ MongoDB connection error:", err.message);
+        console.log("⚠️  Server running without database connection");
+      });
+  } else {
+    console.log("⚠️  No MONGO_URI found, running without database");
+  }
+});

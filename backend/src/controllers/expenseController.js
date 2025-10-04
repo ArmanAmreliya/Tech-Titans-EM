@@ -6,7 +6,7 @@ const { processReceipt } = require('../services/ocrService');
 const { convertCurrency } = require('../services/currencyService');
 const fs = require('fs');
 
-// Submit a new expense (Employee role) with currency conversion
+// Submit a new expense (Employee role) with currency conversion and dynamic approval rules
 exports.submitExpense = async (req, res) => {
   try {
     const { title, description, amount, currency, date } = req.body;
@@ -14,12 +14,27 @@ exports.submitExpense = async (req, res) => {
 
     // Fetch user & company default currency
     const user = await User.findById(submittedBy).populate('companyId');
-    const companyCurrency = user.companyId.defaultCurrency || 'USD'; // fallback
+    const companyCurrency = user.companyId.defaultCurrency || 'USD';
 
     // Convert amount to company currency
     const convertedAmount = await convertCurrency(amount, currency, companyCurrency);
 
-    // Create expense
+    // Fetch active approval rules
+    const approvalRules = await ApprovalRule.find({ companyId: user.companyId, isActive: true });
+
+    // Pick first rule (or fallback sequential)
+    const appliedRule = approvalRules[0];
+
+    // Map approval steps
+    let approvalsArray = [];
+    appliedRule?.approvers.forEach(app => {
+      approvalsArray.push({
+        role: app.role,
+        approver: app.user || null
+      });
+    });
+
+    // Create expense with dynamic rule info
     const expense = new Expense({
       title,
       description,
@@ -28,22 +43,12 @@ exports.submitExpense = async (req, res) => {
       originalAmount: amount,
       originalCurrency: currency,
       date: date || Date.now(),
-      submittedBy
+      submittedBy,
+      approvals: approvalsArray,
+      ruleType: appliedRule?.ruleType || 'sequential',
+      percentage: appliedRule?.percentage || 0,
+      specificApprover: appliedRule?.specificApprover || null
     });
-
-    // Fetch approval rules
-    const approvalRules = await ApprovalRule.find({ companyId: user.companyId, isActive: true });
-    let approvalsArray = [];
-    approvalRules.forEach(rule => {
-      rule.approvers.forEach(app => {
-        approvalsArray.push({
-          role: app.role,
-          approver: app.user || null
-        });
-      });
-    });
-
-    expense.approvals = approvalsArray;
 
     await expense.save();
 
@@ -58,7 +63,8 @@ exports.submitExpense = async (req, res) => {
 exports.getMyExpenses = async (req, res) => {
   try {
     const userId = req.user.id;
-    const expenses = await Expense.find({ submittedBy: userId }).populate('approvals.approver', 'name email role');
+    const expenses = await Expense.find({ submittedBy: userId })
+      .populate('approvals.approver', 'name email role');
     res.json(expenses);
   } catch (err) {
     console.error(err);
@@ -66,7 +72,7 @@ exports.getMyExpenses = async (req, res) => {
   }
 };
 
-// Get all team expenses (for manager/finance/director/admin)
+// Get all team expenses (manager/finance/director/admin)
 exports.getTeamExpenses = async (req, res) => {
   try {
     const userRole = req.user.role;
@@ -77,16 +83,16 @@ exports.getTeamExpenses = async (req, res) => {
     }
 
     let query = {};
-
     if (userRole === 'manager') {
-      // Get employees managed by this manager
+      // Employees under this manager
       const employees = await User.find({ manager: userId }).select('_id');
       const employeeIds = employees.map(emp => emp._id);
       query = { submittedBy: { $in: employeeIds } };
     }
 
-    // Admin or Finance/Director can see all expenses
-    const expenses = await Expense.find(query).populate('submittedBy', 'name email role')
+    // Admin/Finance/Director see all
+    const expenses = await Expense.find(query)
+      .populate('submittedBy', 'name email role')
       .populate('approvals.approver', 'name email role');
 
     res.json(expenses);
@@ -96,9 +102,7 @@ exports.getTeamExpenses = async (req, res) => {
   }
 };
 
-// -------------------------------------------
 // OCR Receipt Upload & Auto-Extract Expense
-// -------------------------------------------
 exports.uploadReceipt = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -115,3 +119,25 @@ exports.uploadReceipt = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const { body, validationResult } = require('express-validator');
+
+// Validation middleware
+exports.validateExpense = [
+  body('title')
+    .notEmpty()
+    .withMessage('Title is required'),
+  body('amount')
+    .isFloat({ gt: 0 })
+    .withMessage('Amount must be greater than 0'),
+  body('currency')
+    .notEmpty()
+    .withMessage('Currency is required'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+

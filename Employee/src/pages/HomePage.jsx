@@ -18,14 +18,11 @@ import {
 } from "react-icons/fa";
 import { formatCurrency } from "../utils/currency";
 import { formatDate } from "../utils/formatDate";
-// import useAuth from "../hooks/useAuth";
-
-// Temporary auth function commented out for now
-// const useAuth = () => ({ logout: () => console.log("Logged out") });
+import useAuth from "../hooks/useAuth";
 
 // --- Sub-components ---
 
-const Sidebar = ({ navigation, logout, sidebarOpen, setSidebarOpen }) => (
+const Sidebar = ({ navigation, logout, sidebarOpen, setSidebarOpen, user }) => (
   <>
     {sidebarOpen && (
       <div
@@ -78,24 +75,23 @@ const Sidebar = ({ navigation, logout, sidebarOpen, setSidebarOpen }) => (
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                D
+                {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
               </span>
             </div>
             <div>
               <p className="text-sm font-medium dark:text-white truncate">
-                Demo User
+                {user?.name || "User"}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Employee
+                {user?.role
+                  ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                  : "Employee"}
               </p>
             </div>
           </div>
           <button
-            onClick={() =>
-              console.log("Logout clicked - auth temporarily disabled")
-            }
+            onClick={logout}
             className="nav-link w-full nav-link-inactive"
-            // Temporary placeholder - replace with actual logout when auth is implemented
           >
             <FaSignOutAlt />
             <span>Logout</span>
@@ -229,6 +225,7 @@ const ExpensesTable = ({ expenses }) => (
 
 // --- Main Page Component ---
 const HomePage = () => {
+  const { user, logout } = useAuth();
   const [stats, setStats] = useState({
     totalExpenses: 484.5,
     approvedExpenses: 245.5,
@@ -295,9 +292,10 @@ const HomePage = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar
         navigation={navigation}
-        // logout={logout} // Commented out temporary auth
+        logout={logout}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
+        user={user}
       />
       <div className="lg:ml-64">
         <Header

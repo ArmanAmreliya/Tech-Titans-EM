@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaUpload } from "react-icons/fa";
+import ExpenseService from "../api/expenseService";
 
 const ExpenseFormModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -193,6 +194,9 @@ const ExpenseFormPage = () => {
     merchant: "",
     receipt: null,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const categories = [
     "Travel",
@@ -210,11 +214,48 @@ const ExpenseFormPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Expense submitted:", formData);
-    // Here you would typically send the data to your API
-    alert("Expense submitted successfully!");
+    setError("");
+    setSuccess("");
+    setLoading(true);
+    
+    console.log("[ExpenseFormPage] Submitting expense:", formData);
+    
+    try {
+      // Create FormData for file upload
+      const submitData = new FormData();
+      submitData.append('amount', formData.amount);
+      submitData.append('currency', formData.currency);
+      submitData.append('category', formData.category);
+      submitData.append('description', formData.description);
+      submitData.append('date', formData.date);
+      submitData.append('merchant', formData.merchant);
+      
+      if (formData.receipt) {
+        submitData.append('receipt', formData.receipt);
+      }
+      
+      const response = await ExpenseService.submitExpense(submitData);
+      console.log("[ExpenseFormPage] Expense submitted successfully:", response);
+      
+      setSuccess("Expense submitted successfully!");
+      // Reset form
+      setFormData({
+        amount: "",
+        currency: "USD",
+        category: "",
+        description: "",
+        date: "",
+        merchant: "",
+        receipt: null,
+      });
+    } catch (error) {
+      console.error("[ExpenseFormPage] Error submitting expense:", error);
+      setError(error.message || "Failed to submit expense");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -224,6 +265,18 @@ const ExpenseFormPage = () => {
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
             Submit New Expense
           </h2>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+              {success}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Amount and Currency */}
@@ -361,9 +414,10 @@ const ExpenseFormPage = () => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white"
+                disabled={loading}
+                className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white"
               >
-                Submit Expense
+                {loading ? "Submitting..." : "Submit Expense"}
               </button>
             </div>
           </form>

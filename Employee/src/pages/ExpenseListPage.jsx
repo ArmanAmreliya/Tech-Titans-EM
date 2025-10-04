@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import * as Icons from "../components/icons/Icons.jsx";
 import ExpenseList from "../components/features/expense/ExpenseList";
+import ExpenseService from "../api/expenseService";
 
 // Dummy utility functions
 const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
@@ -10,92 +11,112 @@ const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
 const ExpenseListPage = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { theme } = useTheme();
   const navigate = useNavigate();
 
-  // Sample expenses data
+  // Load expenses from backend
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setExpenses([
-        {
-          id: 1,
-          title: "Flight to NYC",
-          date: "2025-01-15",
-          category: "Travel",
-          description: "Business trip flight booking",
-          amount: 545.50,
-          status: "approved",
-        },
-        {
-          id: 2,
-          title: "Team Lunch Meeting",
-          date: "2025-01-14",
-          category: "Meals",
-          description: "Client meeting lunch at downtown restaurant",
-          amount: 89.00,
-          status: "pending",
-        },
-        {
-          id: 3,
-          title: "Figma Pro Subscription",
-          date: "2025-01-10",
-          category: "Software",
-          description: "Annual design software subscription",
-          amount: 150.00,
-          status: "approved",
-        },
-        {
-          id: 4,
-          title: "Uber to Airport",
-          date: "2025-01-09",
-          category: "Transportation",
-          description: "Transportation to airport for business trip",
-          amount: 45.25,
-          status: "pending",
-        },
-        {
-          id: 5,
-          title: "Office Supplies",
-          date: "2025-01-08",
-          category: "Office Supplies",
-          description: "Notebooks, pens, and sticky notes",
-          amount: 67.80,
-          status: "rejected",
-        },
-        {
-          id: 6,
-          title: "Conference Registration",
-          date: "2025-01-07",
-          category: "Education",
-          description: "Professional development conference",
-          amount: 299.00,
-          status: "approved",
-        },
-        {
-          id: 7,
-          title: "Client Dinner",
-          date: "2025-01-06",
-          category: "Meals",
-          description: "Business dinner with potential client",
-          amount: 156.75,
-          status: "pending",
-        },
-        {
-          id: 8,
-          title: "Parking Fee",
-          date: "2025-01-05",
-          category: "Transportation",
-          description: "Downtown parking for client meeting",
-          amount: 25.00,
-          status: "approved",
-        },
-      ]);
-      setLoading(false);
-    }, 500);
+    const loadExpenses = async () => {
+      console.log("[ExpenseListPage] Loading expenses from backend...");
+      try {
+        setLoading(true);
+        setError("");
+        
+        const response = await ExpenseService.getMyExpenses();
+        console.log("[ExpenseListPage] Expenses loaded successfully:", response);
+        
+        setExpenses(response.expenses || response || []);
+      } catch (error) {
+        console.error("[ExpenseListPage] Error loading expenses:", error);
+        setError(error.message || "Failed to load expenses");
+        
+        // Fallback to sample data for development
+        console.log("[ExpenseListPage] Using fallback sample data");
+        setExpenses([
+          {
+            id: 1,
+            title: "Flight to NYC",
+            date: "2025-01-15",
+            category: "Travel",
+            description: "Business trip flight booking",
+            amount: 545.50,
+            status: "approved",
+          },
+          {
+            id: 2,
+            title: "Team Lunch Meeting", 
+            date: "2025-01-14",
+            category: "Meals",
+            description: "Client meeting lunch at downtown restaurant",
+            amount: 89.00,
+            status: "pending",
+          },
+          {
+            id: 3,
+            title: "Figma Pro Subscription",
+            date: "2025-01-10",
+            category: "Software",
+            description: "Annual design software subscription",
+            amount: 150.00,
+            status: "approved",
+          },
+          {
+            id: 4,
+            title: "Uber to Airport",
+            date: "2025-01-09",
+            category: "Transportation",
+            description: "Transportation to airport for business trip",
+            amount: 45.25,
+            status: "pending",
+          },
+          {
+            id: 5,
+            title: "Office Supplies",
+            date: "2025-01-08",
+            category: "Office Supplies",
+            description: "Notebooks, pens, and sticky notes",
+            amount: 67.80,
+            status: "rejected",
+          },
+          {
+            id: 6,
+            title: "Conference Registration",
+            date: "2025-01-07",
+            category: "Education",
+            description: "Professional development conference",
+            amount: 299.00,
+            status: "approved",
+          },
+          {
+            id: 7,
+            title: "Client Dinner",
+            date: "2025-01-06",
+            category: "Meals",
+            description: "Business dinner with potential client",
+            amount: 156.75,
+            status: "pending",
+          },
+          {
+            id: 8,
+            title: "Parking Fee",
+            date: "2025-01-05",
+            category: "Transportation",
+            description: "Downtown parking for client meeting",
+            amount: 25.00,
+            status: "approved",
+          },
+        ]);
+      } finally {
+        setLoading(false);
+        console.log("[ExpenseListPage] Loading process completed");
+      }
+    };
+
+    loadExpenses();
   }, []);
 
   // Filter expenses based on search and filters
@@ -162,6 +183,13 @@ const ExpenseListPage = () => {
               New Expense
             </Link>
           </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
 
           {/* Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

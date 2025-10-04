@@ -1,76 +1,32 @@
+// src/models/Expense.js
 const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-
-  description: {
-    type: String,
-    trim: true
-  },
-
-  amount: {
-    type: Number,
-    required: true
-  },
-
-  currency: {
-    type: String,
-    default: 'INR'  // Default company currency
-  },
-
-  date: {
-    type: Date,
-    required: true,
-    default: Date.now
-  },
-
-  submittedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
-  },
-
+  title: String,
+  description: String,
+  amount: Number,
+  currency: String,
+  originalAmount: Number,       // store original currency value
+  originalCurrency: String,
+  date: { type: Date, default: Date.now },
+  submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  
   approvals: [
     {
-      approver: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      role: { type: String, enum: ['manager', 'finance', 'director'] },
+      role: String,
+      approver: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
       approved: { type: Boolean, default: false },
-      approvedAt: { type: Date },
-      comment: { type: String }
+      comment: String,
+      approvedAt: Date
     }
   ],
 
-  ocrData: {
-    vendor: { type: String },
-    expenseType: { type: String },
-    lines: [{ description: String, amount: Number }]
-  },
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
 
-  dateCreated: {
-    type: Date,
-    default: Date.now
-  },
-
-  lastUpdated: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-// Update `lastUpdated` automatically
-expenseSchema.pre('save', function(next) {
-  this.lastUpdated = Date.now();
-  next();
+  // NEW: approval rule information
+  ruleType: { type: String, enum: ['percentage', 'specific', 'hybrid', 'sequential'], default: 'sequential' },
+  percentage: { type: Number, default: 0 }, // e.g., 60 for 60%
+  specificApprover: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 });
 
 module.exports = mongoose.model('Expense', expenseSchema);

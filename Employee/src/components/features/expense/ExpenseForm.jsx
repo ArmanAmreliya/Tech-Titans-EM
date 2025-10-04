@@ -22,6 +22,7 @@ const ExpenseForm = ({ onSubmit, initialData = {}, loading = false }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("[ExpenseForm] Form submitted with data:", formData);
     onSubmit(formData);
   };
 

@@ -24,11 +24,17 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    console.log("[LoginPage] Form submitted with data:", {
+      email: formData.email,
+      password: "***",
+    });
 
     try {
-      await login(formData);
+      const result = await login(formData);
+      console.log("[LoginPage] Login successful:", result);
       // Redirect will be handled by the auth system
     } catch (err) {
+      console.error("[LoginPage] Login failed:", err);
       setError(err.message || "Login failed");
     }
   };
@@ -39,6 +45,24 @@ const LoginPage = () => {
         <h2 className="text-center text-xl font-bold text-gray-900 mb-6">
           Sign in to your account
         </h2>
+
+        {/* Test Credentials */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 className="text-sm font-semibold text-blue-800 mb-2">
+            Test Credentials:
+          </h3>
+          <div className="text-xs text-blue-700 space-y-1">
+            <div>
+              <strong>Employee:</strong> employee404@gmail.com / EMP@404
+            </div>
+            <div>
+              <strong>Manager:</strong> manager404@gmail.com / MANAGER@404
+            </div>
+            <div>
+              <strong>Admin:</strong> admin404@gmail.com / ADMIN@404
+            </div>
+          </div>
+        </div>
 
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">

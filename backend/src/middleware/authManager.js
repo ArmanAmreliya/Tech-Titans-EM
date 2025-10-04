@@ -1,6 +1,6 @@
 const jwt=require('jsonwebtoken');
 
-const authEmployee= async(req,res,next)=>{
+const authManager= async(req,res,next)=>{
 
     try{
        const {token}=req.headers
@@ -20,4 +20,4 @@ const authEmployee= async(req,res,next)=>{
 
 }
 
-module.exports=authEmployee
+module.exports=authManager

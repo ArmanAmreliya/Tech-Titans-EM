@@ -1,69 +1,20 @@
+// src/models/ApprovalRule.js
 const mongoose = require('mongoose');
 
-const approvalRuleSchema = new mongoose.Schema({
-  companyId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Company',
-    required: true
-  },
-
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-
-  description: {
-    type: String,
-    trim: true
-  },
-
-  type: {
-    type: String,
-    enum: ['sequential', 'parallel'],
-    default: 'sequential'
-  },
-
-
+const ApprovalRuleSchema = new mongoose.Schema({
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+  name: String, // e.g., "Standard Expense Approval"
+  isActive: { type: Boolean, default: true },
   approvers: [
     {
-      role: { type: String, enum: ['manager', 'finance', 'director'] },
-      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-      isMandatory: { type: Boolean, default: false } 
+      role: { type: String, enum: ['manager','finance','director','admin'], required: true },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // optional specific approver
+      step: Number // sequence order
     }
   ],
+  ruleType: { type: String, enum: ['percentage','specific','hybrid'], default: 'percentage' },
+  percentage: Number, // for percentage rule
+  specificApprover: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // for specific approver rule
+}, { timestamps: true });
 
-  percentageRule: {
-    type: Number, // e.g., 60 means 60% of approvers must approve
-    default: null
-  },
-
-  specificApproverRule: {
-    type: mongoose.Schema.Types.ObjectId, // If this user approves, auto-approved
-    ref: 'User',
-    default: null
-  },
-
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-
-  dateCreated: {
-    type: Date,
-    default: Date.now
-  },
-
-  lastUpdated: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-
-approvalRuleSchema.pre('save', function(next) {
-  this.lastUpdated = Date.now();
-  next();
-});
-
-module.exports = mongoose.model('ApprovalRule', approvalRuleSchema);
+module.exports = mongoose.model('ApprovalRule', ApprovalRuleSchema);

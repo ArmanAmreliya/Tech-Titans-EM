@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 // import ExpenseService from "../api/expenseService";
 import { useTheme } from "../contexts/ThemeContext";
@@ -7,10 +6,8 @@ import * as Icons from "../components/icons/Icons.jsx";
 // import { formatCurrency } from "../utils/currency";
 // import { formatDate } from "../utils/formatDate";
 // import useAuth from "../hooks/useAuth";
-=======
-import React, { useState } from "react";
+// import React, { useState } from "react";
 import { FaMoon, FaSun, FaSignOutAlt, FaPlus, FaChevronDown, FaChevronUp, FaPaperclip } from "react-icons/fa";
->>>>>>> 630f512709503bbb4fadb43231e2f17fe9211662
 
 // Dummy utility functions for standalone component
 const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
@@ -228,124 +225,6 @@ const ExpensesTable = ({ expenses }) => (
 
 // --- Main Page Component ---
 const HomePage = () => {
-<<<<<<< HEAD
-  const [stats, setStats] = useState({
-    totalExpenses: 484.5,
-    approvedExpenses: 245.5,
-    pendingExpenses: 89.0,
-  });
-  const [expenses, setExpenses] = useState([
-    {
-      id: 1,
-      date: "2025-01-15",
-      category: "Travel",
-      description: "Flight to NYC",
-      amount: 245.5,
-      status: "approved",
-    },
-    {
-      id: 2,
-      date: "2025-01-14",
-      category: "Meals",
-      description: "Team lunch",
-      amount: 89.0,
-      status: "pending",
-    },
-    {
-      id: 3,
-      date: "2025-01-10",
-      category: "Software",
-      description: "Figma subscription",
-      amount: 150.0,
-      status: "rejected",
-    },
-  ]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const { theme, toggleTheme } = useTheme();
-  // Temporary auth commented out
-  // const { logout } = useAuth();
-
-  const filteredExpenses = expenses.filter(
-    (expense) =>
-      (selectedCategory === "all" ||
-        expense.category.toLowerCase() === selectedCategory) &&
-      expense.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const navigation = [
-    { name: "Dashboard", href: "/", icon: Icons.DashboardIcon, current: true },
-    {
-      name: "My Expenses",
-      href: "/expenses",
-      icon: Icons.ExpenseIcon,
-      current: false,
-    },
-  ];
-  const categories = ["all", "travel", "meals", "software", "office"];
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar
-        navigation={navigation}
-        // logout={logout} // Commented out temporary auth
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
-      <div className="lg:ml-64">
-        <Header
-          setSidebarOpen={setSidebarOpen}
-          toggleTheme={toggleTheme}
-          theme={theme}
-        />
-        <main className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard
-              title="Total Expenses"
-              value={stats.totalExpenses}
-              icon={Icons.DashboardIcon}
-              trend="12%"
-            />
-            <StatCard
-              title="Approved"
-              value={stats.approvedExpenses}
-              icon={Icons.CheckCircleIcon}
-            />
-            <StatCard
-              title="Pending"
-              value={stats.pendingExpenses}
-              icon={Icons.ClockIcon}
-            />
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border dark:border-gray-700">
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-field sm:max-w-xs"
-              />
-              <div className="flex gap-2 flex-wrap">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`category-filter ${
-                      selectedCategory === cat
-                        ? "category-filter-active"
-                        : "category-filter-inactive"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <ExpensesTable expenses={filteredExpenses} />
-=======
   const [darkMode, setDarkMode] = useState(true);
 
   const toggleTheme = () => {
@@ -580,7 +459,6 @@ const HomePage = () => {
         </tbody>
       </table>
     </div>
->>>>>>> 630f512709503bbb4fadb43231e2f17fe9211662
         </main>
       </div>
     </div>
@@ -588,4 +466,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-

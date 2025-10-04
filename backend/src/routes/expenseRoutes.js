@@ -1,20 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const expenseController = require('../controllers/expenseController');
-const authMiddleware = require('../middlewares/authMiddleware');
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' }); // Temporary storage for OCR
+const { submitExpense, getMyExpenses, getTeamExpenses, uploadReceipt, validateExpense } = require('../controllers/expenseController');
+const { authMiddleware, authorizeRoles } = require('../middleware/authMiddleware');
 
-// Submit a new expense
-router.post('/', authMiddleware, expenseController.submitExpense);
+const upload = require('../middleware/uploadMiddleware');
 
-// Get my expenses
-router.get('/my', authMiddleware, expenseController.getMyExpenses);
+// Submit expense with validation
+router.post('/submit', authMiddleware, validateExpense, submitExpense);
+
+// Get user expenses
+router.get('/my-expenses', authMiddleware, getMyExpenses);
 
 // Get team expenses
-router.get('/team', authMiddleware, expenseController.getTeamExpenses);
+router.get('/team-expenses', authMiddleware, getTeamExpenses);
 
 // Upload receipt (OCR)
-router.post('/upload-receipt', authMiddleware, upload.single('receipt'), expenseController.uploadReceipt);
+router.post('/upload-receipt', authMiddleware, upload.single('receipt'), uploadReceipt);
 
 module.exports = router;
+

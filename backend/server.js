@@ -32,9 +32,13 @@ app.use((err, req, res, next) => {
 });
 
 // MongoDB connection (hardcoded URI for now)
-const PORT = 5000;
-const MONGO_URI =
-  "mongodb+srv://coder2878_db_user:jCL7VehHWeGkn8UX@cluster0.poc3dqk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI = process.env.MONGO_URI;
+const PORT = process.env.PORT || 5000;
+
+if (!MONGO_URI) {
+  console.error("❌ MONGO_URI is not defined in environment variables");
+  process.exit(1);
+}
 
 mongoose
   .connect(MONGO_URI, {

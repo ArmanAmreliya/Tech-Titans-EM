@@ -10,11 +10,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+<<<<<<< HEAD
     "bcryptjs": "^3.0.2",
+=======
+    "bcrypt": "^6.0.0",
+>>>>>>> 630f512709503bbb4fadb43231e2f17fe9211662
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+<<<<<<< HEAD
     "mongoose": "^8.19.0"
+=======
+    "mongoose": "^8.19.0",
+    "tesseract.js": "^6.0.1"
+>>>>>>> 630f512709503bbb4fadb43231e2f17fe9211662
   }
 }

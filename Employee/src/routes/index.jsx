@@ -23,11 +23,7 @@ const PrivateRoute = ({ children }) => {
     );
   }
 
-  return isAuthenticated ? (
-    <MainLayout>{children}</MainLayout>
-  ) : (
-    <Navigate to="/login" replace />
-  );
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 const PublicRoute = ({ children }) => {

@@ -1,14 +1,13 @@
-import React from 'react'
-
+import React from "react";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import AppRoutes from "./routes";
 
 function App() {
-  
-
   return (
-    <>
-     <h1 className="text-4xl font-bold">Hello Tech Titans</h1>
-    </>
-  )
+    <ThemeProvider>
+      <AppRoutes />
+    </ThemeProvider>
+  );
 }
 
-export default App
+export default App;

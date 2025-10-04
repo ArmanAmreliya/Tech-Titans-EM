@@ -27,7 +27,6 @@ const userSchema = new mongoose.Schema({
   },
 
   manager: {
-    // Each employee can have a manager
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
@@ -35,7 +34,7 @@ const userSchema = new mongoose.Schema({
 
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Company',  // Optional: if you want multi-company support
+    ref: 'Company',  
     required: false
   },
 

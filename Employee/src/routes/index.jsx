@@ -54,16 +54,13 @@ const AppRoutes = () => {
           }
         />
 
-        {/* Private Routes */}
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <HomePage />
-            </PrivateRoute>
-          }
-        />
+        {/* Direct access to HomePage without authentication */}
+        <Route path="/" element={<HomePage />} />
 
+        {/* Direct access to HomePage via /home route as well */}
+        <Route path="/home" element={<HomePage />} />
+
+        {/* Keep admin dashboard protected for now */}
         <Route
           path="/expenses"
           element={

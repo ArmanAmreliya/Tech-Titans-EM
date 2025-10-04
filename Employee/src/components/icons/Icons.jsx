@@ -1,3 +1,9 @@
+import PropTypes from "prop-types";
+
+const iconPropTypes = {
+  className: PropTypes.string,
+};
+
 // Dashboard Icons
 export const DashboardIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -20,6 +26,7 @@ export const DashboardIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+DashboardIcon.propTypes = iconPropTypes;
 
 export const ExpenseIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -36,6 +43,7 @@ export const ExpenseIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+ExpenseIcon.propTypes = iconPropTypes;
 
 export const SunIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -52,6 +60,7 @@ export const SunIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+SunIcon.propTypes = iconPropTypes;
 
 export const MoonIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -68,6 +77,7 @@ export const MoonIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+MoonIcon.propTypes = iconPropTypes;
 
 export const TrendUpIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -84,6 +94,7 @@ export const TrendUpIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+TrendUpIcon.propTypes = iconPropTypes;
 
 export const CheckCircleIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -100,6 +111,7 @@ export const CheckCircleIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+CheckCircleIcon.propTypes = iconPropTypes;
 
 export const ClockIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -116,6 +128,7 @@ export const ClockIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+ClockIcon.propTypes = iconPropTypes;
 
 export const MenuIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -132,6 +145,7 @@ export const MenuIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+MenuIcon.propTypes = iconPropTypes;
 
 export const XIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -148,6 +162,7 @@ export const XIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+XIcon.propTypes = iconPropTypes;
 
 export const LogoutIcon = ({ className = "w-5 h-5" }) => (
   <svg
@@ -164,6 +179,7 @@ export const LogoutIcon = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+LogoutIcon.propTypes = iconPropTypes;
 
 export const EditIcon = ({ className = "w-4 h-4" }) => (
   <svg
@@ -180,3 +196,4 @@ export const EditIcon = ({ className = "w-4 h-4" }) => (
     />
   </svg>
 );
+EditIcon.propTypes = iconPropTypes;

@@ -10,6 +10,8 @@ import AuthLayout from "../layouts/AuthLayout";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import AdminDashboardPage from "../pages/AdminDashboardPage";
+import ExpenseListPage from "../pages/ExpenseListPage";
+import ExpenseFormPage from "../pages/ExpenseFormPage";
 import Spinner from "../components/ui/Spinner";
 
 const PrivateRoute = ({ children }) => {
@@ -60,9 +62,13 @@ const AppRoutes = () => {
         {/* Direct access to HomePage via /home route as well */}
         <Route path="/home" element={<HomePage />} />
 
+        {/* Expense Management Routes */}
+        <Route path="/expenses" element={<ExpenseListPage />} />
+        <Route path="/expenses/new" element={<ExpenseFormPage />} />
+
         {/* Keep admin dashboard protected for now */}
         <Route
-          path="/expenses"
+          path="/admin"
           element={
             <PrivateRoute>
               <AdminDashboardPage />

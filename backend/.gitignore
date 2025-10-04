@@ -1,0 +1,15 @@
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+```// filepath: c:\Users\Lenovo\Desktop\Tech-Titans-EM\.gitignore
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local

@@ -14,7 +14,7 @@ exports.submitExpense = async (req, res) => {
 
     // Fetch user & company default currency
     const user = await User.findById(submittedBy).populate('companyId');
-    const companyCurrency = user.companyId.defaultCurrency || 'USD';
+    const companyCurrency ="INR";
 
     // Convert amount to company currency
     const convertedAmount = await convertCurrency(amount, currency, companyCurrency);
@@ -72,7 +72,7 @@ exports.getMyExpenses = async (req, res) => {
   }
 };
 
-// Get all team expenses (manager/finance/director/admin)
+
 exports.getTeamExpenses = async (req, res) => {
   try {
     const userRole = req.user.role;
@@ -84,13 +84,11 @@ exports.getTeamExpenses = async (req, res) => {
 
     let query = {};
     if (userRole === 'manager') {
-      // Employees under this manager
       const employees = await User.find({ manager: userId }).select('_id');
       const employeeIds = employees.map(emp => emp._id);
       query = { submittedBy: { $in: employeeIds } };
     }
 
-    // Admin/Finance/Director see all
     const expenses = await Expense.find(query)
       .populate('submittedBy', 'name email role')
       .populate('approvals.approver', 'name email role');
